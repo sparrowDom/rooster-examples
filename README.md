@@ -2,5 +2,5 @@
 
 ```
 yarn
-yarn test
+yarn test -vv
 ```
