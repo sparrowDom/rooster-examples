@@ -1,0 +1,9 @@
+[profile.default]
+src = 'contracts'
+test = 'test'
+out = 'out'
+libs = ['node_modules']
+cache_path  = 'forge-cache'
+solc_version = "0.8.25"
+path_pattern_inverse = "./contracts/*"
+optimizer_runs = 1
