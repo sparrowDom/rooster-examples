@@ -10,6 +10,7 @@ import {IMaverickV2LiquidityManager} from "@maverick/v2-interfaces/contracts/int
 import {IMaverickV2PoolLens} from "@maverick/v2-interfaces/contracts/interfaces/IMaverickV2PoolLens.sol";
 import {IMaverickV2Quoter} from "@maverick/v2-interfaces/contracts/interfaces/IMaverickV2Quoter.sol";
 import {IMaverickV2Router} from "@maverick/v2-interfaces/contracts/interfaces/IMaverickV2Router.sol";
+import {IMaverickV2Position} from "@maverick/v2-interfaces/contracts/interfaces/IMaverickV2Position.sol";
 
 abstract contract BaseTest is Test {
     IMaverickV2Factory internal factory;
@@ -23,6 +24,7 @@ abstract contract BaseTest is Test {
     IMaverickV2PoolLens public lens = IMaverickV2PoolLens(0x15B4a8cc116313b50C19BCfcE4e5fc6EC8C65793);
     IMaverickV2Quoter public quoter = IMaverickV2Quoter(0xf245948e9cf892C351361d298cc7c5b217C36D82);
     IMaverickV2Router public router = IMaverickV2Router(payable(0x35e44dc4702Fd51744001E248B49CBf9fcc51f0C));
+    IMaverickV2Position public position = IMaverickV2Position(0x0b452E8378B65FD16C0281cfe48Ed9723b8A1950);
 
     address public this_;
 
@@ -40,7 +42,7 @@ abstract contract BaseTest is Test {
         deal(address(wplume), this_, 1e20);
     }
 
-    // function ripped from Maverick tests
+    // returns flat liquidity distribution +/- 2 ticks from the active tick
     function _getTickAndRelativeLiquidity(
         uint128 liquidityAmount,
         IMaverickV2Pool _pool
