@@ -37,7 +37,7 @@ contract AddLiquidityTest is BaseTest {
             addSpec: addSpec
         });
 
-        (bytes memory packedSqrtPriceBreaks, bytes[] memory packedArgs, , , ) = lens.getAddLiquidityParams(
+        (bytes memory packedSqrtPriceBreaks, bytes[] memory packedArgs, , ,IMaverickV2PoolLens.TickDeltas[] memory tickDeltas) = lens.getAddLiquidityParams(
             addParamsViewInputs
         );
 
@@ -46,6 +46,8 @@ contract AddLiquidityTest is BaseTest {
             packedSqrtPriceBreaks,
             packedArgs
         );
+        console2.log("Amount tokenA tickDeltas ", tickDeltas[0].deltaAOut);
+        console2.log("Amount tokenB tickDeltas ", tickDeltas[0].deltaBOut);
         console2.log("Amount tokenA Added ", amountA);
         console2.log("Amount tokenB Added ", amountB);
 
