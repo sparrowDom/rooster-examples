@@ -15,12 +15,7 @@ contract AddLiquidityTest is BaseTest {
         pool.tokenA().approve(address(manager), 1e45);
         pool.tokenB().approve(address(manager), 1e45);
 
-        uint256 liquidityAmount = vm.randomUint(1e18, 1e20);
-        //bool tokenALiquidity = vm.randomBool();
-        uint256 swapAmount = vm.randomUint(liquidityAmount - 1e18, liquidityAmount);
-        //bool tokenAInSwap = vm.randomBool();
-
-        addLiquidity(liquidityAmount, true);
+        addLiquidity(1e18, true);
         swapToPool(1e17, true);
     }
 
@@ -47,8 +42,8 @@ contract AddLiquidityTest is BaseTest {
             addParamsViewInputs
         );
 
-        console2.log("tickDeltas[0].deltaAOut", tickDeltas[0].deltaAOut);
-        console2.log("tickDeltas[0].deltaBOut", tickDeltas[0].deltaBOut);
+        console2.log("WETH deltaOut", tickDeltas[0].deltaAOut);
+        console2.log("OETHp deltaOut", tickDeltas[0].deltaBOut);
 
         (uint256 amountA, uint256 amountB, , uint256 tokenId) = manager.mintPositionNftToSender(
             pool,
@@ -59,12 +54,12 @@ contract AddLiquidityTest is BaseTest {
         int256 tokenADiff = int256(tickDeltas[0].deltaAOut) - int256(amountA);
         int256 tokenBDiff = int256(tickDeltas[0].deltaBOut) - int256(amountB);
 
-        if (tokenADiff < 0 || tokenBDiff < 0) {
-            // Great success!
+        if (tokenADiff < 0) {
+            console2.log("Add liquiduty transfered more WETH than anticipated: ", tokenADiff);
         }
-
-        console2.log("Amount tokenA diff ", tokenADiff);
-        console2.log("Amount tokenB diff ", tokenBDiff);
+        if (tokenBDiff < 0) {
+            console2.log("Add liquiduty transfered more OETHp than anticipated: ", tokenBDiff);
+        }
     }
 
     function swapToPool(uint256 amount, bool tokenAIn) public {
