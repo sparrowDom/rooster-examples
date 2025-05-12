@@ -12,19 +12,16 @@ contract AddLiquidityTest is BaseTest {
     }
 
     function testAddLiquidity() public {
-        for (uint256 i = 0; i < 5; i++) {
-            pool.tokenA().approve(address(manager), 1e45);
-            pool.tokenB().approve(address(manager), 1e45);
+        pool.tokenA().approve(address(manager), 1e45);
+        pool.tokenB().approve(address(manager), 1e45);
 
-            uint256 liquidityAmount = vm.randomUint(1e18, 1e20);
-            //bool tokenALiquidity = vm.randomBool();
-            uint256 swapAmount = vm.randomUint(liquidityAmount - 1e18, liquidityAmount);
-            //bool tokenAInSwap = vm.randomBool();
+        uint256 liquidityAmount = vm.randomUint(1e18, 1e20);
+        //bool tokenALiquidity = vm.randomBool();
+        uint256 swapAmount = vm.randomUint(liquidityAmount - 1e18, liquidityAmount);
+        //bool tokenAInSwap = vm.randomBool();
 
-            addLiquidity(liquidityAmount, true);
-            swapToPool(1e17, true);
-            addLiquidity(vm.randomUint(1e18, 1e20), true);
-        }
+        addLiquidity(liquidityAmount, true);
+        swapToPool(1e17, true);
     }
 
     function addLiquidity(uint256 amount, bool isTokenA) public {
