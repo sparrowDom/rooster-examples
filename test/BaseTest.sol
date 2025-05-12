@@ -38,8 +38,8 @@ abstract contract BaseTest is Test {
         console2.log("TokenB", IERC20Metadata(address(weth)).symbol());
         this_ = address(this);
 
-        deal(address(weth), this_, 1e20);
-        deal(address(wplume), this_, 1e20);
+        deal(address(weth), this_, 1e50);
+        deal(address(wplume), this_, 1e50);
     }
 
     // returns flat liquidity distribution +/- 2 ticks from the active tick

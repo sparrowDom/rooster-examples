@@ -12,64 +12,67 @@ contract AddLiquidityTest is BaseTest {
     }
 
     function testAddLiquidity() public {
-        pool.tokenA().approve(address(manager), 1e30);
-        pool.tokenB().approve(address(manager), 1e30);
-
         for (uint256 i = 0; i < 10; i++) {
-            // get ticks and liquidity params assuming flat distribution
-            (int32[] memory ticks, uint128[] memory relativeLiquidityAmounts) = _getTickAndRelativeLiquidity(1e18, pool);
+            pool.tokenA().approve(address(manager), 1e45);
+            pool.tokenB().approve(address(manager), 1e45);
 
-            uint256 maxAmountA = 1e18 + i * 33e16;
-            //console2.log("Amount tokenA Target", maxAmountA);
+            uint256 liquidityAmount = vm.randomUint(1e18, 1e20);
+            //bool tokenALiquidity = vm.randomBool();
+            uint256 swapAmount = vm.randomUint(1e16, 1e18);
+            //bool tokenAInSwap = vm.randomBool();
 
-            uint256 slippageFactor = 0.01e18;
-            IMaverickV2PoolLens.AddParamsSpecification memory addSpec = IMaverickV2PoolLens.AddParamsSpecification({
-                slippageFactorD18: slippageFactor,
-                numberOfPriceBreaksPerSide: 0,
-                targetAmount: maxAmountA,
-                targetIsA: true
-            });
-
-            IMaverickV2PoolLens.AddParamsViewInputs memory addParamsViewInputs = IMaverickV2PoolLens.AddParamsViewInputs({
-                pool: pool,
-                kind: 0,
-                ticks: ticks,
-                relativeLiquidityAmounts: relativeLiquidityAmounts,
-                addSpec: addSpec
-            });
-
-            (bytes memory packedSqrtPriceBreaks, bytes[] memory packedArgs, , ,IMaverickV2PoolLens.TickDeltas[] memory tickDeltas) = lens.getAddLiquidityParams(
-                addParamsViewInputs
-            );
-
-            (uint256 amountA, uint256 amountB, , uint256 tokenId) = manager.mintPositionNftToSender(
-                pool,
-                packedSqrtPriceBreaks,
-                packedArgs
-            );
-            console2.log("Amount tokenA diff ", tickDeltas[0].deltaAOut - amountA);
-            console2.log("Amount tokenB diff ", tickDeltas[0].deltaBOut - amountB);
-
-            if (i == 3) {
-                swapToPool();
-            }
-            //// REMOVE
-            // IMaverickV2Pool.RemoveLiquidityParams memory params = position.getRemoveParams(tokenId, 0, 1e18);
-            // (amountA, amountB) = position.removeLiquidityToSender(tokenId, pool, params);
-
-            // slightly less is removed since the first LP in each bin donates a
-            // small amount of permenent liquidity.
-            // console2.log("Amount tokenA Removed", amountA);
-            // console2.log("Amount tokenB Removed", amountB);
+            addLiquidity(liquidityAmount, true);
+            swapToPool(swapAmount, true);
         }
     }
 
-    function swapToPool() public {
+    function addLiquidity(uint256 amount, bool isTokenA) public {
+        // get ticks and liquidity params assuming flat distribution
+        (int32[] memory ticks, uint128[] memory relativeLiquidityAmounts) = _getTickAndRelativeLiquidity(1e18, pool);
+
+        IMaverickV2PoolLens.AddParamsSpecification memory addSpec = IMaverickV2PoolLens.AddParamsSpecification({
+            slippageFactorD18: 0,
+            numberOfPriceBreaksPerSide: 0,
+            targetAmount: amount,
+            targetIsA: isTokenA
+        });
+
+        IMaverickV2PoolLens.AddParamsViewInputs memory addParamsViewInputs = IMaverickV2PoolLens.AddParamsViewInputs({
+            pool: pool,
+            kind: 0,
+            ticks: ticks,
+            relativeLiquidityAmounts: relativeLiquidityAmounts,
+            addSpec: addSpec
+        });
+
+        (bytes memory packedSqrtPriceBreaks, bytes[] memory packedArgs, , ,IMaverickV2PoolLens.TickDeltas[] memory tickDeltas) = lens.getAddLiquidityParams(
+            addParamsViewInputs
+        );
+
+        console2.log("tickDeltas[0].deltaAOut", tickDeltas[0].deltaAOut);
+        console2.log("tickDeltas[0].deltaBOut", tickDeltas[0].deltaBOut);
+
+        (uint256 amountA, uint256 amountB, , uint256 tokenId) = manager.mintPositionNftToSender(
+            pool,
+            packedSqrtPriceBreaks,
+            packedArgs
+        );
+
+        int256 tokenADiff = int256(tickDeltas[0].deltaAOut) - int256(amountA);
+        int256 tokenBDiff = int256(tickDeltas[0].deltaBOut) - int256(amountB);
+
+        if (tokenADiff < 0 || tokenBDiff < 0) {
+            // Great success!
+        }
+
+        console2.log("Amount tokenA diff ", tokenADiff);
+        console2.log("Amount tokenB diff ", tokenBDiff);
+    }
+
+    function swapToPool(uint256 amount, bool tokenAIn) public {
         pool.tokenA().approve(address(manager), 1e30);
         pool.tokenB().approve(address(manager), 1e30);
 
-        bool tokenAIn = false;
-        uint256 amount = 1e5;
         if (tokenAIn) {
             pool.tokenA().transfer(address(pool), amount);
         } else {
