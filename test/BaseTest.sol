@@ -11,13 +11,14 @@ import {IMaverickV2PoolLens} from "@maverick/v2-interfaces/contracts/interfaces/
 import {IMaverickV2Quoter} from "@maverick/v2-interfaces/contracts/interfaces/IMaverickV2Quoter.sol";
 import {IMaverickV2Router} from "@maverick/v2-interfaces/contracts/interfaces/IMaverickV2Router.sol";
 import {IMaverickV2Position} from "@maverick/v2-interfaces/contracts/interfaces/IMaverickV2Position.sol";
+import {IVault} from "../interfaces/IVault.sol";
 
 abstract contract BaseTest is Test {
     IMaverickV2Factory internal factory;
 
     IMaverickV2Pool public pool;
     IERC20 public weth;
-    IERC20 public wplume;
+    IERC20 public oethp;
 
     IMaverickV2LiquidityManager public manager =
         IMaverickV2LiquidityManager(payable(0x28d79eddBF5B215cAccBD809B967032C1E753af7));
@@ -25,21 +26,26 @@ abstract contract BaseTest is Test {
     IMaverickV2Quoter public quoter = IMaverickV2Quoter(0xf245948e9cf892C351361d298cc7c5b217C36D82);
     IMaverickV2Router public router = IMaverickV2Router(payable(0x35e44dc4702Fd51744001E248B49CBf9fcc51f0C));
     IMaverickV2Position public position = IMaverickV2Position(0x0b452E8378B65FD16C0281cfe48Ed9723b8A1950);
+    IVault public oethVault = IVault(0xc8c8F8bEA5631A8AF26440AF32a55002138cB76a);
 
     address public this_;
 
     function startFork() internal {
-        vm.selectFork(vm.createFork("https://phoenix-rpc.plumenetwork.xyz", 16113));
+        vm.selectFork(vm.createFork("https://phoenix-rpc.plumenetwork.xyz", 1231568));
         factory = IMaverickV2Factory(0x056A588AfdC0cdaa4Cab50d8a4D2940C5D04172E);
-        pool = factory.lookup(0, 1)[0];
-        wplume = pool.tokenA();
-        weth = pool.tokenB();
-        console2.log("TokenA", IERC20Metadata(address(wplume)).symbol());
-        console2.log("TokenB", IERC20Metadata(address(weth)).symbol());
+        pool = IMaverickV2Pool(0xcA26a025eD16c5becD100C0165136aA1E34f7E58);
+        weth = pool.tokenA();
+        oethp = pool.tokenB();
+        console2.log("TokenA", IERC20Metadata(address(weth)).symbol());
+        console2.log("TokenB", IERC20Metadata(address(oethp)).symbol());
         this_ = address(this);
 
         deal(address(weth), this_, 1e50);
-        deal(address(wplume), this_, 1e50);
+        //deal(address(oethp), this_, 1e50);
+        weth.approve(address(oethVault), 1e22);
+        oethVault.mint(address(weth), 1e22, 0);
+
+        deal(address(weth), this_, 1e50);
     }
 
     // returns flat liquidity distribution +/- 2 ticks from the active tick

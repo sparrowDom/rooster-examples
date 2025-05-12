@@ -22,7 +22,7 @@ contract AddLiquidityTest is BaseTest {
             //bool tokenAInSwap = vm.randomBool();
 
             addLiquidity(liquidityAmount, true);
-            swapToPool(swapAmount, false);
+            swapToPool(1e17, true);
             addLiquidity(vm.randomUint(1e18, 1e20), true);
         }
     }
