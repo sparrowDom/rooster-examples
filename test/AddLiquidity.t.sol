@@ -14,14 +14,18 @@ contract AddLiquidityTest is BaseTest {
     function testAddLiquidity() public {
         pool.tokenA().approve(address(manager), 1e45);
         pool.tokenB().approve(address(manager), 1e45);
-
-        addLiquidity(1e18, true);
-        swapToPool(1e17, true);
+        
+        addLiquidity(1e18, false);
+        swapToPool(31863996000339528, false);
+        addLiquidity(781142219187302584, true);
     }
 
     function addLiquidity(uint256 amount, bool isTokenA) public {
         // get ticks and liquidity params assuming flat distribution
-        (int32[] memory ticks, uint128[] memory relativeLiquidityAmounts) = _getTickAndRelativeLiquidity(1e18, pool);
+        int32[] memory ticks = new int32[](1);
+        uint128[] memory relativeLiquidityAmounts = new uint128[](1);
+        ticks[0] = -1;
+        relativeLiquidityAmounts[0] = 1e18;
 
         IMaverickV2PoolLens.AddParamsSpecification memory addSpec = IMaverickV2PoolLens.AddParamsSpecification({
             slippageFactorD18: 0,
@@ -42,23 +46,20 @@ contract AddLiquidityTest is BaseTest {
             addParamsViewInputs
         );
 
-        console2.log("WETH deltaOut", tickDeltas[0].deltaAOut);
-        console2.log("OETHp deltaOut", tickDeltas[0].deltaBOut);
-
         (uint256 amountA, uint256 amountB, , uint256 tokenId) = manager.mintPositionNftToSender(
             pool,
             packedSqrtPriceBreaks,
             packedArgs
         );
 
-        int256 tokenADiff = int256(tickDeltas[0].deltaAOut) - int256(amountA);
-        int256 tokenBDiff = int256(tickDeltas[0].deltaBOut) - int256(amountB);
+        int256 tokenDiff = isTokenA ? int256(amount) - int256(amountA) : int256(amount) - int256(amountB);
 
-        if (tokenADiff < 0) {
-            console2.log("Add liquiduty transfered more WETH than anticipated: ", tokenADiff);
-        }
-        if (tokenBDiff < 0) {
-            console2.log("Add liquiduty transfered more OETHp than anticipated: ", tokenBDiff);
+        if (tokenDiff < 0) {
+            console2.log("Target amount passed to lens contract: ", amount);
+            console2.log("Token is A: ", isTokenA);
+            console2.log("Token consumed: ", isTokenA ? amountA : amountB);
+            console2.log("tokenDiff: ", tokenDiff);
+            require(false, "Found the error it!");
         }
     }
 

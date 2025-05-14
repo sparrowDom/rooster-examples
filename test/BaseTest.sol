@@ -36,8 +36,6 @@ abstract contract BaseTest is Test {
         pool = IMaverickV2Pool(0xcA26a025eD16c5becD100C0165136aA1E34f7E58);
         weth = pool.tokenA();
         oethp = pool.tokenB();
-        console2.log("TokenA", IERC20Metadata(address(weth)).symbol());
-        console2.log("TokenB", IERC20Metadata(address(oethp)).symbol());
         this_ = address(this);
 
         deal(address(weth), this_, 1e50);
